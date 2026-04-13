@@ -115,7 +115,9 @@ function ArtworkSkeleton() {
 
 function ArtworkCard({ artwork, onClick, index }) {
   const [imageLoaded, setImageLoaded] = useState(false);
+  const [imageFailed, setImageFailed] = useState(false);
   const imageUrl = getImageUrl(artwork.image_id, 600);
+  const lqip = artwork.thumbnail?.lqip;
 
   return (
     <div
@@ -127,15 +129,22 @@ function ArtworkCard({ artwork, onClick, index }) {
       tabIndex={0}
       onKeyDown={(e) => e.key === 'Enter' && onClick(artwork)}
     >
-      <div className="artwork-card-image-wrapper">
-        {!imageLoaded && <div className="skeleton skeleton-image" />}
-        <img
-          src={imageUrl}
-          alt={artwork.title}
-          className={`artwork-card-image ${imageLoaded ? 'loaded' : ''}`}
-          onLoad={() => setImageLoaded(true)}
-          loading="lazy"
-        />
+      <div
+        className="artwork-card-image-wrapper"
+        style={lqip ? { backgroundImage: `url(${lqip})`, backgroundSize: 'cover', backgroundPosition: 'center' } : {}}
+      >
+        {!imageLoaded && !imageFailed && !lqip && <div className="skeleton skeleton-image" />}
+        {!imageFailed && (
+          <img
+            src={imageUrl}
+            alt={artwork.title}
+            className={`artwork-card-image ${imageLoaded ? 'loaded' : ''}`}
+            onLoad={() => setImageLoaded(true)}
+            onError={() => setImageFailed(true)}
+            loading="lazy"
+            referrerPolicy="no-referrer"
+          />
+        )}
         <div className="artwork-card-overlay">
           <span className="artwork-card-cta">🎭 Get Roasted</span>
         </div>
@@ -327,6 +336,7 @@ function ArtworkModal({ artwork, onClose }) {
                 alt={artwork.title}
                 className={`modal-artwork-image ${imageLoaded ? 'loaded' : ''}`}
                 onLoad={() => setImageLoaded(true)}
+                referrerPolicy="no-referrer"
               />
             </div>
             <div className="modal-artwork-details">
